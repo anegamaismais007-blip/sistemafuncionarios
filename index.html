@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem de Ponto Facial - Controle de Frequência</title>
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="CSS/style.css">
+    <!-- Supabase JS Client via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="totem-container">
+        <!-- Header / Cabeçalho -->
+        <header class="totem-header">
+            <div class="header-brand">
+                <h1>Totem Ponto Facial</h1>
+                <p>Sistema Inteligente de Ponto e Frequência</p>
+            </div>
+            <div class="header-status">
+                <div id="clock-display" class="clock-display">00:00:00</div>
+                <div id="network-status" class="status-badge status-online">
+                    <span class="status-dot"></span>
+                    <span id="network-status-text">Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Body / Área Principal -->
+        <main class="totem-main">
+            <!-- Coluna da Câmera -->
+            <section class="camera-section card">
+                <h2>Reconhecimento Facial</h2>
+                <div class="video-container">
+                    <video id="webcam-video" autoplay playsinline muted></video>
+                    <canvas id="snapshot-canvas" style="display: none;"></canvas>
+                    <div id="camera-overlay" class="camera-overlay">
+                        <div class="face-guide"></div>
+                    </div>
+                </div>
+                <div class="camera-controls">
+                    <button id="btn-toggle-camera" class="btn btn-secondary">Iniciar Câmera</button>
+                    <button id="btn-capture-photo" class="btn btn-action" disabled>Capturar Foto</button>
+                </div>
+                <div id="photo-preview-container" class="photo-preview-container" style="display: none;">
+                    <p class="preview-label">Foto Capturada:</p>
+                    <img id="photo-preview" src="" alt="Prévia da Foto">
+                </div>
+            </section>
+
+            <!-- Coluna de Formato e Ações -->
+            <section class="action-section card">
+                <h2>Registrar Batida</h2>
+
+                <form id="ponto-form" onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="input-matricula">Matrícula do Funcionário:</label>
+                        <input type="text" id="input-matricula" class="input-control" placeholder="Digite a matrícula..." autocomplete="off" required>
+                        <button type="button" id="btn-buscar-funcionario" class="btn btn-secondary btn-sm" style="margin-top: 8px;">Buscar Funcionário</button>
+                    </div>
+
+                    <!-- Informações do Funcionário Encontrado -->
+                    <div id="funcionario-info" class="info-card" style="display: none;">
+                        <p><strong>Nome:</strong> <span id="funcionario-nome">-</span></p>
+                        <p><strong>Status:</strong> <span id="funcionario-status" class="badge-success">Ativo</span></p>
+                        <p><strong>Jornada:</strong> <span id="funcionario-jornada">-</span></p>
+                    </div>
+
+                    <!-- Seleção do Tipo de Batida -->
+                    <div class="form-group">
+                        <label>Tipo de Batida:</label>
+                        <div class="batida-buttons-grid">
+                            <button type="button" class="btn-batida" data-tipo="ENTRADA">Entrada</button>
+                            <button type="button" class="btn-batida" data-tipo="SAIDA_ALMOCO">Saída Almoço</button>
+                            <button type="button" class="btn-batida" data-tipo="RETORNO_ALMOCO">Retorno Almoço</button>
+                            <button type="button" class="btn-batida" data-tipo="SAIDA">Saída</button>
+                        </div>
+                        <input type="hidden" id="tipo-batida-selecionado" value="">
+                    </div>
+
+                    <!-- Notificações e Avisos -->
+                    <div id="message-box" class="message-box" style="display: none;"></div>
+
+                    <!-- Botão Principal de Confirmação -->
+                    <button id="btn-confirmar-registro" class="btn btn-primary btn-lg" disabled>
+                        Confirmar Ponto
+                    </button>
+                </form>
+
+                <!-- Pendências de Sincronização Offline -->
+                <div id="sync-container" class="sync-container" style="display: none;">
+                    <div class="sync-info">
+                        <span id="pending-count-text">0 registro(s) pendente(s) de sincronização.</span>
+                    </div>
+                    <button id="btn-sync-now" class="btn btn-warning btn-sm">Sincronizar Agora</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal de Comprovante de Registro -->
+        <div id="receipt-modal" class="modal-backdrop" style="display: none;">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <h3>Comprovante de Registro de Ponto</h3>
+                    <button id="btn-close-modal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="receipt-details">
+                        <p><strong>Funcionário:</strong> <span id="receipt-nome"></span></p>
+                        <p><strong>Matrícula:</strong> <span id="receipt-matricula"></span></p>
+                        <p><strong>Data/Hora:</strong> <span id="receipt-datahora"></span></p>
+                        <p><strong>Tipo:</strong> <span id="receipt-tipo"></span></p>
+                        <p><strong>Status Jornada:</strong> <span id="receipt-status-jornada"></span></p>
+                        <p><strong>Modo:</strong> <span id="receipt-modo"></span></p>
+                        <div class="hash-box">
+                            <p class="hash-title">Hash do Comprovante (SHA-256):</p>
+                            <code id="receipt-hash"></code>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-modal-ok" class="btn btn-primary">Concluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Lógica (ES Modules) -->
+    <script type="module" src="JS/app.js"></script>
+</body>
+</html>
